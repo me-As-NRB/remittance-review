@@ -49,7 +49,7 @@ describe('mock API over HTTP', () => {
     expect((await api('/batches/B-104')).status).toBe(200)
 
     mockControls.failNext = 'network'
-    await expect(api('/batches/B-104')).rejects.toThrow()
+    await expect(api('/batches/B-104')).rejects.toBeInstanceOf(TypeError)
     expect(mockControls.failNext).toBeNull()
   })
 

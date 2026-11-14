@@ -2,7 +2,7 @@ import { flushPromises } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { effectScope, nextTick } from 'vue'
 import { deferred, fakeClient, makeCharge } from '@/__tests__/fixtures'
-import { ApiError } from '@/api/client'
+import { ApiError, type ApiClient } from '@/api/client'
 import type { Charge } from '@/batch/types'
 import { SEARCH_DEBOUNCE_MS, useChargeSearch } from '../useChargeSearch'
 
@@ -18,7 +18,7 @@ const newResults = [makeCharge({ id: 'CH-41', claimId: 'C-504' })]
 
 function setup() {
   const requests: PendingSearch[] = []
-  const searchCharges = vi.fn((q: string, { signal }: { signal?: AbortSignal } = {}) => {
+  const searchCharges = vi.fn<ApiClient['searchCharges']>((q, { signal } = {}) => {
     const response = deferred<Charge[]>()
     requests.push({ q, signal, resolve: response.resolve, reject: response.reject })
     return response.promise
@@ -54,8 +54,10 @@ describe('useChargeSearch', () => {
     expect(searchCharges).not.toHaveBeenCalled()
 
     await vi.advanceTimersByTimeAsync(1)
-    expect(searchCharges).toHaveBeenCalledOnce()
-    expect(searchCharges).toHaveBeenCalledWith('C-5', expect.objectContaining({ signal: expect.any(AbortSignal) }))
+    expect(searchCharges).toHaveBeenCalledExactlyOnceWith(
+      'C-5',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    )
   })
 
   it('a slow old response never overwrites a fast new one', async () => {
