@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse, type JsonBodyType } from 'msw'
 import { PROBLEM_CONTENT_TYPE } from '@/api/problem'
 import { nextDelayMs, takeFailure } from './controls'
 import { problem, type MockDb, type MockResponse } from './db'
@@ -36,7 +36,7 @@ async function serve(handle: () => MockResponse | Promise<MockResponse>): Promis
   }
 
   const { status, body } = await handle()
-  return HttpResponse.json(body, {
+  return HttpResponse.json(body as JsonBodyType, {
     status,
     headers: status >= 400 ? { 'Content-Type': PROBLEM_CONTENT_TYPE } : {},
   })
