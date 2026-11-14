@@ -33,6 +33,11 @@ export function formatCents(c: number): string {
   return `${negative ? MINUS_SIGN : ''}$${grouped}.${cents}`
 }
 
+/** Formats an API amount string for display: "-200.00" → "−$200.00". */
+export function formatAmount(s: string): string {
+  return formatCents(parseCents(s))
+}
+
 /** Turns integer cents back into the API's amount string: 12050 → "120.50", -20000 → "-200.00". */
 export function toAmount(c: number): string {
   const { negative, dollars, cents } = split(c)
