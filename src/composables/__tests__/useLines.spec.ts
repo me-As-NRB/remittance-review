@@ -5,6 +5,7 @@ import { deferred, fakeClient, makeLine } from '@/__tests__/fixtures'
 import { ApiError, type ApiClient } from '@/api/client'
 import type { Problem } from '@/api/problem'
 import type { Line } from '@/batch/types'
+import type { Politeness } from '../useAnnouncer'
 import { useLines } from '../useLines'
 
 const L6 = makeLine({ id: 'L-6', claimId: 'C-504', billed: '500.00', paid: '200.00', adjustments: '300.00' })
@@ -19,9 +20,9 @@ function problem(code: Problem['code'], status: number, extra: Partial<Problem> 
 }
 
 async function setup(overrides: Partial<ApiClient> = {}) {
-  const announce = vi.fn()
-  const onChanged = vi.fn()
-  const onBatchPosted = vi.fn()
+  const announce = vi.fn<(message: string, politeness?: Politeness) => void>()
+  const onChanged = vi.fn<() => void>()
+  const onBatchPosted = vi.fn<() => void>()
   const client = fakeClient({ getLines: () => Promise.resolve([L6, L7]), ...overrides })
   const scope = effectScope()
   const lines = scope.run(() => useLines('B-104', { client, announce, onChanged, onBatchPosted }))
@@ -40,7 +41,7 @@ describe('useLines', () => {
 
   it('updates the row immediately, then replaces it with the server line', async () => {
     const response = deferred<Line>()
-    const matchLine = vi.fn(() => response.promise)
+    const matchLine = vi.fn<ApiClient['matchLine']>(() => response.promise)
     const { lines, row, onChanged } = await setup({ matchLine })
 
     void lines.match('L-6', SPLIT)
@@ -134,7 +135,10 @@ describe('useLines', () => {
 
     await lines.changeState('L-7', 'Suspense')
     expect(row('L-7')).toEqual(L7)
-    expect(lines.rowStatus.get('L-7')?.error?.message).toBe('Line L-7 was not saved.')
+    expect(lines.rowStatus.get('L-7')?.error).toEqual({
+      message: "Line L-7 was not saved. Couldn't reach the server.",
+      fields: {},
+    })
   })
 
   it('sends the reason when excluding and clears allocations optimistically', async () => {

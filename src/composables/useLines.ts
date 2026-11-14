@@ -108,8 +108,10 @@ export function useLines(batchId: MaybeRefOrGetter<string>, options: UseLinesOpt
     }
     const fields = err.code === 'validation' ? err.fieldErrors : {}
     const details = Object.values(fields).flat()
-    setStatus(lineId, { error: { message: `Line ${lineId} was not saved.`, fields } })
-    announce(`Line ${lineId} was not saved. ${details.length > 0 ? details.join(' ') : err.message}`, 'assertive')
+    // With field errors the row lists them; otherwise say what went wrong (e.g. no connection).
+    const message = details.length > 0 ? `Line ${lineId} was not saved.` : `Line ${lineId} was not saved. ${err.message}`
+    setStatus(lineId, { error: { message, fields } })
+    announce(details.length > 0 ? `${message} ${details.join(' ')}` : message, 'assertive')
   }
 
   /** Retry the user's change on top of the server's current line, sending its version. */
