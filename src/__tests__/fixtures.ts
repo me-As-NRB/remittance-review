@@ -1,4 +1,27 @@
-import type { Batch, Charge, Line } from '@/batch/types'
+import type { ApiClient } from '@/api/client'
+import type { Batch, BatchSummary, Charge, Line } from '@/batch/types'
+
+/** An ApiClient whose methods fail unless a test provides them. */
+export function fakeClient(overrides: Partial<ApiClient> = {}): ApiClient {
+  const unexpected = (name: string) => () => Promise.reject(new Error(`Unexpected call to ${name}`))
+  return {
+    getBatch: unexpected('getBatch'),
+    getLines: unexpected('getLines'),
+    searchCharges: unexpected('searchCharges'),
+    matchLine: unexpected('matchLine'),
+    setLineState: unexpected('setLineState'),
+    ...overrides,
+  }
+}
+
+export function makeSummary(overrides: Partial<BatchSummary> = {}): BatchSummary {
+  return {
+    ...makeBatch(),
+    totals: { Unmatched: '0.00', Matched: '0.00', Suspense: '0.00', Excluded: '0.00' },
+    canPost: true,
+    ...overrides,
+  }
+}
 
 /** Test data builders with sensible defaults; override only what a test cares about. */
 export function makeLine(overrides: Partial<Line> = {}): Line {

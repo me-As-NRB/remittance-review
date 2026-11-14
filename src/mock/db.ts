@@ -1,4 +1,5 @@
 import type { Problem, ProblemCode } from '@/api/problem'
+import { withoutReason } from '@/batch/changes'
 import { readiness } from '@/batch/readiness'
 import { isValidLine, totalsByState } from '@/batch/rules'
 import { LINE_STATES, type Batch, type Charge, type Line, type TargetState } from '@/batch/types'
@@ -199,12 +200,6 @@ export function problem(
 
 export function validation(errors: Record<string, string[]>): MockResponse {
   return problem(422, 'validation', 'The request has invalid fields', { errors })
-}
-
-function withoutReason(line: Line): Line {
-  const copy = { ...line }
-  delete copy.reason
-  return copy
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
