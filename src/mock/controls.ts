@@ -36,8 +36,11 @@ export function nextDelayMs(random: () => number = Math.random): number {
   switch (mockControls.delayMode) {
     case 'off':
       return 0
-    case 'fixed':
-      return mockControls.fixedDelayMs
+    case 'fixed': {
+      // The dev panel's number box can be empty mid-edit: treat anything odd as no delay.
+      const ms = mockControls.fixedDelayMs
+      return Number.isSafeInteger(ms) && ms > 0 ? ms : 0
+    }
     case 'random':
       return RANDOM_DELAY_MS.min + Math.floor(random() * (RANDOM_DELAY_MS.max - RANDOM_DELAY_MS.min + 1))
   }
