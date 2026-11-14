@@ -17,6 +17,9 @@ npm install
 npm run dev
 ```
 
+If npm warns that it skipped msw's install script, that's fine: the service worker it would
+generate is already committed in `public/mockServiceWorker.js`.
+
 Open http://localhost:5173. It redirects to batch B-104. The links at the top switch batches:
 
 | Batch | What it is |
