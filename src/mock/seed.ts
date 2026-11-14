@@ -132,7 +132,7 @@ function generateLargeBatch(): { batch: Batch; lines: Line[]; charges: Charge[] 
 
     lines.push(
       line({
-        id: `L-${String(i).padStart(3, '0')}`,
+        id: `G-${String(i).padStart(3, '0')}`,
         batchId: 'B-500',
         claimId,
         code,
